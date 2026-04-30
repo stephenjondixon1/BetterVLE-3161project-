@@ -1,0 +1,553 @@
+{
+	"info": {
+		"_postman_id": "comp3161-bettervle-api-v2",
+		"name": "COMP3161 BetterVLE API",
+		"description": "Postman collection for the BetterVLE Course Management System API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:3000/api", "type": "string" },
+		{ "key": "auth_token", "value": "", "type": "string" }
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Student",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"user_name\": \"teststudent1\",\n\t\"password\": \"pass123\",\n\t\"role\": \"student\",\n\t\"first_name\": \"Matthew\",\n\t\"last_name\": \"Brown\",\n\t\"major\": \"Computer Science\",\n\t\"department\": \"Computing\",\n\t\"gpa\": 3.5\n}" },
+						"url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+						"description": "Register a new student. Auto-enrolls in 3 random courses."
+					}, "response": []
+				},
+				{
+					"name": "Register Lecturer",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"user_name\": \"testlecturer1\",\n\t\"password\": \"pass123\",\n\t\"role\": \"lecturer\",\n\t\"first_name\": \"Jane\",\n\t\"last_name\": \"Smith\",\n\t\"department\": \"Computing\"\n}" },
+						"url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+					}, "response": []
+				},
+				{
+					"name": "Login as Admin",
+					"event": [{ "listen": "test", "script": { "exec": ["var jsonData = pm.response.json();", "if (jsonData.token) {", "    pm.collectionVariables.set('auth_token', jsonData.token);", "}"], "type": "text/javascript" } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"user_name\": \"admin1\",\n\t\"password\": \"admin123\"\n}" },
+						"url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+						"description": "Token auto-saved to {{auth_token}}."
+					}, "response": []
+				},
+				{
+					"name": "Login as Lecturer",
+					"event": [{ "listen": "test", "script": { "exec": ["var jsonData = pm.response.json();", "if (jsonData.token) {", "    pm.collectionVariables.set('auth_token', jsonData.token);", "}"], "type": "text/javascript" } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"user_name\": \"lecturer2\",\n\t\"password\": \"pass123\"\n}" },
+						"url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+						"description": "Lecturer 2 = Bradley Terry (teaches COMP0001-COMP0004). Token auto-saved."
+					}, "response": []
+				},
+				{
+					"name": "Login as Student",
+					"event": [{ "listen": "test", "script": { "exec": ["var jsonData = pm.response.json();", "if (jsonData.token) {", "    pm.collectionVariables.set('auth_token', jsonData.token);", "}"], "type": "text/javascript" } }],
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"user_name\": \"student52\",\n\t\"password\": \"pass123\"\n}" },
+						"url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+						"description": "Student 52 = Robin Anderson. Token auto-saved."
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "Retrieve All Courses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] },
+						"description": "No auth required."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve All Courses with Stats (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/with-stats", "host": ["{{base_url}}"], "path": ["courses", "with-stats"] },
+						"description": "GET /api/courses/with-stats — includes enrolled_students count. Admin only."
+					}, "response": []
+				},
+				{
+					"name": "Create Course (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"course_code\": \"COMP0201\",\n\t\"course_title\": \"Advanced Databases\"\n}" },
+						"url": { "raw": "{{base_url}}/courses", "host": ["{{base_url}}"], "path": ["courses"] },
+						"description": "Admin only. created_by auto-set from JWT."
+					}, "response": []
+				},
+				{
+					"name": "Update Course (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"course_title\": \"Advanced Database Systems\"\n}" },
+						"url": { "raw": "{{base_url}}/courses/COMP0201", "host": ["{{base_url}}"], "path": ["courses", "COMP0201"] },
+						"description": "PUT /api/courses/:courseCode — Admin only."
+					}, "response": []
+				},
+				{
+					"name": "Delete Course (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/COMP0201", "host": ["{{base_url}}"], "path": ["courses", "COMP0201"] },
+						"description": "DELETE /api/courses/:courseCode — cascades deletes. Admin only."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Courses for Student",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/students/52", "host": ["{{base_url}}"], "path": ["courses", "students", "52"] },
+						"description": "GET /api/courses/students/:studentId"
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Courses for Lecturer",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/lecturers/2", "host": ["{{base_url}}"], "path": ["courses", "lecturers", "2"] },
+						"description": "GET /api/courses/lecturers/:lecturerId"
+					}, "response": []
+				},
+				{
+					"name": "Get Available Courses for Student",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/students/52/available", "host": ["{{base_url}}"], "path": ["courses", "students", "52", "available"] },
+						"description": "GET /api/courses/students/:studentId/available — courses the student is NOT enrolled in."
+					}, "response": []
+				},
+				{
+					"name": "Assign Lecturer to Course (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"lecturer_id\": 3\n}" },
+						"url": { "raw": "{{base_url}}/courses/COMP0201/assign-lecturer", "host": ["{{base_url}}"], "path": ["courses", "COMP0201", "assign-lecturer"] },
+						"description": "POST /api/courses/:courseCode/assign-lecturer — Admin only. Max 5 courses per lecturer."
+					}, "response": []
+				},
+				{
+					"name": "Register Student for Course",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"student_id\": 52\n}" },
+						"url": { "raw": "{{base_url}}/courses/COMP0201/register", "host": ["{{base_url}}"], "path": ["courses", "COMP0201", "register"] },
+						"description": "POST /api/courses/:courseCode/register — student_id auto-set from JWT if logged in as student. Max 6 courses per student."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Course Members",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/COMP0001/members", "host": ["{{base_url}}"], "path": ["courses", "COMP0001", "members"] },
+						"description": "GET /api/courses/:courseCode/members — returns lecturer + students. Grades hidden from students."
+					}, "response": []
+				},
+				{
+					"name": "Remove Student from Course (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/courses/COMP0001/students/52", "host": ["{{base_url}}"], "path": ["courses", "COMP0001", "students", "52"] },
+						"description": "DELETE /api/courses/:courseCode/students/:studentId — Admin only."
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Calendar Events",
+			"item": [
+				{
+					"name": "Create Calendar Event",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"title\": \"Midterm Exam\",\n\t\"event_details\": \"Covers weeks 1-6 material.\",\n\t\"event_date\": \"2024-03-15\"\n}" },
+						"url": { "raw": "{{base_url}}/calendar/courses/COMP0001/events", "host": ["{{base_url}}"], "path": ["calendar", "courses", "COMP0001", "events"] },
+						"description": "POST /api/calendar/courses/:courseCode/events — Admin or lecturer only."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Events for Course",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/calendar/courses/COMP0001/events", "host": ["{{base_url}}"], "path": ["calendar", "courses", "COMP0001", "events"] }
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Events for Student by Date",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/calendar/students/52/events?date=2024-03-15", "host": ["{{base_url}}"], "path": ["calendar", "students", "52", "events"], "query": [{ "key": "date", "value": "2024-03-15" }] },
+						"description": "GET /api/calendar/students/:studentId/events?date=YYYY-MM-DD"
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Upcoming Events for Student",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/calendar/students/52/upcoming", "host": ["{{base_url}}"], "path": ["calendar", "students", "52", "upcoming"] },
+						"description": "GET /api/calendar/students/:studentId/upcoming — next 7 days."
+					}, "response": []
+				},
+				{
+					"name": "Update Calendar Event",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"title\": \"Midterm Exam (Rescheduled)\",\n\t\"event_date\": \"2024-03-20\"\n}" },
+						"url": { "raw": "{{base_url}}/calendar/events/1", "host": ["{{base_url}}"], "path": ["calendar", "events", "1"] },
+						"description": "PUT /api/calendar/events/:eventId — Admin or lecturer only."
+					}, "response": []
+				},
+				{
+					"name": "Delete Calendar Event",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/calendar/events/1", "host": ["{{base_url}}"], "path": ["calendar", "events", "1"] },
+						"description": "DELETE /api/calendar/events/:eventId — Admin or lecturer only."
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Forums & Threads",
+			"item": [
+				{
+					"name": "Create Forum for Course",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{}" },
+						"url": { "raw": "{{base_url}}/forums/courses/COMP0001/forums", "host": ["{{base_url}}"], "path": ["forums", "courses", "COMP0001", "forums"] },
+						"description": "created_by auto-set from JWT. Empty body is fine."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Forums for Course",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/forums/courses/COMP0001/forums", "host": ["{{base_url}}"], "path": ["forums", "courses", "COMP0001", "forums"] }
+					}, "response": []
+				},
+				{
+					"name": "Create Discussion Thread",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"title\": \"Help with Network Security Lab\",\n\t\"starter_post\": \"Can someone explain how to set up the firewall rules for Lab 3?\"\n}" },
+						"url": { "raw": "{{base_url}}/forums/forums/1/threads", "host": ["{{base_url}}"], "path": ["forums", "forums", "1", "threads"] },
+						"description": "created_by auto-set from JWT."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Threads for Forum",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/forums/forums/1/threads", "host": ["{{base_url}}"], "path": ["forums", "forums", "1", "threads"] }
+					}, "response": []
+				},
+				{
+					"name": "Reply to Thread",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"content\": \"Make sure you allow inbound traffic on port 443.\"\n}" },
+						"url": { "raw": "{{base_url}}/forums/threads/1/replies", "host": ["{{base_url}}"], "path": ["forums", "threads", "1", "replies"] },
+						"description": "Top-level reply."
+					}, "response": []
+				},
+				{
+					"name": "Reply to a Reply (Nested)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"content\": \"That worked! Thanks, port 443 was blocked.\",\n\t\"parent_reply_id\": 1\n}" },
+						"url": { "raw": "{{base_url}}/forums/threads/1/replies", "host": ["{{base_url}}"], "path": ["forums", "threads", "1", "replies"] },
+						"description": "Nested reply with parent_reply_id."
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Replies for Thread",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/forums/threads/1/replies", "host": ["{{base_url}}"], "path": ["forums", "threads", "1", "replies"] }
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Course Content",
+			"item": [
+				{
+					"name": "Create Section",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"section_num\": 1\n}" },
+						"url": { "raw": "{{base_url}}/content/courses/COMP0001/sections", "host": ["{{base_url}}"], "path": ["content", "courses", "COMP0001", "sections"] },
+						"description": "Lecturer/admin only. Note returned section_id for adding items."
+					}, "response": []
+				},
+				{
+					"name": "Add Link to Section",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"item_name\": \"OWASP Top 10\",\n\t\"link_name\": \"OWASP Top 10 Reference\",\n\t\"url\": \"https://owasp.org/www-project-top-ten/\"\n}" },
+						"url": { "raw": "{{base_url}}/content/sections/1/links", "host": ["{{base_url}}"], "path": ["content", "sections", "1", "links"] }
+					}, "response": []
+				},
+				{
+					"name": "Add Slides to Section",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"item_name\": \"Week 1 Lecture Slides\",\n\t\"slideset_name\": \"Intro to Cyber Security\",\n\t\"slide_url\": \"https://school.edu/slides/cybersec_intro.pptx\"\n}" },
+						"url": { "raw": "{{base_url}}/content/sections/1/slides", "host": ["{{base_url}}"], "path": ["content", "sections", "1", "slides"] }
+					}, "response": []
+				},
+				{
+					"name": "Add File to Section",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"item_name\": \"Course Syllabus\",\n\t\"file_name\": \"COMP0001 Syllabus\",\n\t\"file_url\": \"https://school.edu/files/comp0001_syllabus.pdf\"\n}" },
+						"url": { "raw": "{{base_url}}/content/sections/1/files", "host": ["{{base_url}}"], "path": ["content", "sections", "1", "files"] }
+					}, "response": []
+				},
+				{
+					"name": "Retrieve Course Content",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/content/courses/COMP0001/content", "host": ["{{base_url}}"], "path": ["content", "courses", "COMP0001", "content"] }
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Assignments",
+			"item": [
+				{
+					"name": "Create Assignment (Lecturer)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"weight\": 25\n}" },
+						"url": { "raw": "{{base_url}}/assignments/courses/COMP0001/assignments", "host": ["{{base_url}}"], "path": ["assignments", "courses", "COMP0001", "assignments"] },
+						"description": "Lecturer/admin only. Weight = percentage of final grade."
+					}, "response": []
+				},
+				{
+					"name": "Get Assignment Details",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/assignments/assignments/1", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1"] },
+						"description": "GET /api/assignments/assignments/:assignmentId"
+					}, "response": []
+				},
+				{
+					"name": "Update Assignment (Lecturer)",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"weight\": 30\n}" },
+						"url": { "raw": "{{base_url}}/assignments/assignments/1", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1"] },
+						"description": "PUT /api/assignments/assignments/:assignmentId — Lecturer/admin only."
+					}, "response": []
+				},
+				{
+					"name": "Delete Assignment (Lecturer)",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/assignments/assignments/1", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1"] },
+						"description": "DELETE /api/assignments/assignments/:assignmentId — cascades to submissions. Lecturer/admin only."
+					}, "response": []
+				},
+				{
+					"name": "Submit Assignment (Student)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"submission_content\": \"https://school.edu/submissions/student52_a1.pdf\"\n}" },
+						"url": { "raw": "{{base_url}}/assignments/assignments/1/submissions", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1", "submissions"] },
+						"description": "student_id auto-set from JWT when logged in as student."
+					}, "response": []
+				},
+				{
+					"name": "Grade Submission (Lecturer)",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"body": { "mode": "raw", "raw": "{\n\t\"submission_grade\": 85\n}" },
+						"url": { "raw": "{{base_url}}/assignments/assignments/1/submissions/52/grade", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1", "submissions", "52", "grade"] },
+						"description": "PUT — also recalculates and updates enroll.grade (weighted average)."
+					}, "response": []
+				},
+				{
+					"name": "Get Student Submissions",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/assignments/students/52/submissions", "host": ["{{base_url}}"], "path": ["assignments", "students", "52", "submissions"] }
+					}, "response": []
+				},
+				{
+					"name": "Get Student Submission for Assignment",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/assignments/assignments/1/students/52", "host": ["{{base_url}}"], "path": ["assignments", "assignments", "1", "students", "52"] },
+						"description": "GET /api/assignments/assignments/:assignmentId/students/:studentId"
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"description": "Admin user management and student detail routes under /api/users",
+			"item": [
+				{
+					"name": "Get All Students (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/students", "host": ["{{base_url}}"], "path": ["users", "students"] },
+						"description": "Admin only."
+					}, "response": []
+				},
+				{
+					"name": "Get All Lecturers (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/lecturers", "host": ["{{base_url}}"], "path": ["users", "lecturers"] },
+						"description": "Admin only."
+					}, "response": []
+				},
+				{
+					"name": "Get Student Course Grade",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/students/52/courses/COMP0001/grade", "host": ["{{base_url}}"], "path": ["users", "students", "52", "courses", "COMP0001", "grade"] },
+						"description": "GET /api/users/students/:studentId/courses/:courseCode/grade"
+					}, "response": []
+				},
+				{
+					"name": "Get Student Performance Summary",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/students/52/performance", "host": ["{{base_url}}"], "path": ["users", "students", "52", "performance"] },
+						"description": "GET /api/users/students/:studentId/performance — overall average + per-course breakdown."
+					}, "response": []
+				},
+				{
+					"name": "Get Assignment Submissions (Lecturer/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/assignments/1/submissions", "host": ["{{base_url}}"], "path": ["users", "assignments", "1", "submissions"] },
+						"description": "GET /api/users/assignments/:assignmentId/submissions — all student submissions for an assignment."
+					}, "response": []
+				},
+				{
+					"name": "Get Course Assignments",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/users/courses/COMP0001/assignments", "host": ["{{base_url}}"], "path": ["users", "courses", "COMP0001", "assignments"] },
+						"description": "GET /api/users/courses/:courseCode/assignments — list all assignments for a course."
+					}, "response": []
+				}
+			]
+		},
+		{
+			"name": "Reports (SQL Views)",
+			"description": "Admin only.",
+			"item": [
+				{
+					"name": "Courses with 50+ Students",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/reports/courses-50-plus", "host": ["{{base_url}}"], "path": ["reports", "courses-50-plus"] }
+					}, "response": []
+				},
+				{
+					"name": "Students with 5+ Courses",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/reports/students-5-plus", "host": ["{{base_url}}"], "path": ["reports", "students-5-plus"] }
+					}, "response": []
+				},
+				{
+					"name": "Lecturers with 3+ Courses",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/reports/lecturers-3-plus", "host": ["{{base_url}}"], "path": ["reports", "lecturers-3-plus"] }
+					}, "response": []
+				},
+				{
+					"name": "Top 10 Most Enrolled Courses",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/reports/top-10-courses", "host": ["{{base_url}}"], "path": ["reports", "top-10-courses"] }
+					}, "response": []
+				},
+				{
+					"name": "Top 10 Students by Average",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+						"url": { "raw": "{{base_url}}/reports/top-10-students", "host": ["{{base_url}}"], "path": ["reports", "top-10-students"] }
+					}, "response": []
+				}
+			]
+		}
+	]
+}
