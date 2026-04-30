@@ -1,16 +1,14 @@
-const mysql = require('mysql2/promise');
-require('dotenv').config();
+const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Database2016!',
-  database: process.env.DB_NAME || 'betterVLE',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  decimalNumbers: true,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-module.exports = pool;
+module.exports = pool.promise();
