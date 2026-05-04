@@ -13,7 +13,11 @@ const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "https://bettervle-webapp.vercel.app",
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -28,6 +32,7 @@ app.get('/', (req, res) => {
       content: '/api/content',
       assignments: '/api/assignments',
       reports: '/api/reports',
+      users: '/api/users'
     },
   });
 });
