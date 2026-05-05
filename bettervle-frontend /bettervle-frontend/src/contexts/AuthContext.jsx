@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await authAPI.login(credentials);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, credentials);
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
